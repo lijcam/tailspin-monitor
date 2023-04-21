@@ -8,7 +8,7 @@ metadata:
   labels:
     app: leaderboard
     app.kubernetes.io/component: leaderboard
-    app.kubernetes.io/instance: leaderboard
+    app.kubernetes.io/instance: tailspin
     app.kubernetes.io/name: leaderboard
     app.kubernetes.io/part-of: tailspin
     app.openshift.io/runtime: dotnet
@@ -40,7 +40,7 @@ metadata:
   labels:
     app: leaderboard
     app.kubernetes.io/component: leaderboard
-    app.kubernetes.io/instance: leaderboard
+    app.kubernetes.io/instance: tailspin
     app.kubernetes.io/name: leaderboard
     app.kubernetes.io/part-of: tailspin
 spec:
