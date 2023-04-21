@@ -21,7 +21,7 @@ spec:
       prune: false
       selfHeal: false
   source:
-    repoURL: https://github.com/lijcam/tailspin-argocd-cd.git
+    repoURL: https://github.com/lijcam/tailspin-monitor.git
     targetRevision: HEAD
     path: base
   destination:
