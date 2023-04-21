@@ -1,0 +1,21 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailspin
+  namespace: openshift-gitops
+spec:
+  project: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: false
+      selfHeal: false
+  source:
+    repoURL: https://github.com/lijcam/tailspin-argocd-cd.git
+    targetRevision: HEAD
+    path: base
+  destination:
+    namespace: sidecase-example
+    server: https://kubernetes.default.svc

@@ -1,0 +1,114 @@
+---
+kind: Deployment
+apiVersion : apps/v1
+metadata:
+  name: web
+  labels:
+    app: web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/instance: web
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: tailspin
+    app.openshift.io/runtime: dotnet
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: diagvol
+          emptyDir: {}
+      containers:
+        - name: web
+          image: quay.io/lijcam/space-game-web:326
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: DOTNET_DiagnosticPorts
+              value: /diag/dotnet-monitor.sock
+          volumeMounts:
+            - mountPath: /diag
+              name: diagvol
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+        - name: monitor
+          image: mcr.microsoft.com/dotnet/monitor:6
+          args: [ "--no-auth" ]
+          imagePullPolicy: Always
+          env:
+          - name: DOTNETMONITOR_DiagnosticPort__ConnectionMode
+            value: Listen
+          - name: DOTNETMONITOR_DiagnosticPort__EndpointName
+            value: /diag/dotnet-monitor.sock
+          - name: DOTNETMONITOR_Storage__DumpTempFolder
+            value: /diag/dumps
+          - name: DOTNETMONITOR_Urls
+            value: http://+:52323
+          volumeMounts:
+          - mountPath: /diag
+            name: diagvol
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: web
+  labels:
+    app: web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/instance: web
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: tailspin
+
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080 
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: web
+
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: web
+  labels:
+    app: web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/instance: web
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: tailspin
+    app.openshift.io/runtime: dotnet
+
+spec:
+  port:
+    targetPort: 8080
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: web
+    weight: 100
+  wildcardPolicy: None
